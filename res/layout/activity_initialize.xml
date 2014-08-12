@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <EditText
+    	android:id="@+id/dialogAddName"
+    	android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+    	android:ems="10"
+    	android:hint="@string/enter_name_hint" >
+        <requestFocus />
+    </EditText>
+    
+    <EditText
+    	android:id="@+id/dialogAddGoalWeight"
+    	android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+    	android:ems="10"
+    	android:hint="@string/enter_goal_hint" >
+        <requestFocus />
+    </EditText>
+    
+     <TextView
+    	android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:text="@string/end_date_label"
+    	android:textSize="22sp" />
+ 
+    <DatePicker
+    	android:id="@+id/dialogEndDatePicker"
+    	android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:calendarViewShown="false" />
+    <LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:gravity="center">
+		<Button
+			android:id="@+id/initialize_this_button"
+			android:layout_width="wrap_content"
+			android:layout_height="fill_parent"
+			android:layout_marginTop="10dip"
+			android:layout_marginLeft="15dip"
+			android:layout_marginRight="15dip"
+			android:text="@string/ok"/>
+		<Button
+			android:id="@+id/cancel_initialization_button"
+			android:layout_width="wrap_content"
+			android:layout_height="fill_parent"
+			android:layout_marginTop="10dip"
+			android:layout_marginLeft="15dip"
+			android:layout_marginRight="15dip"
+			android:text="@string/cancel"/>
+	</LinearLayout>
+</LinearLayout>

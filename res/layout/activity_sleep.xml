@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/inspire_bkgrd"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+     >
+
+    <TextView
+        android:id="@+id/sleep_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:text="@string/sleep_tracker_title"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/inspire"
+        android:textSize="30sp"
+        android:textStyle="italic" />
+
+    <TextView
+        android:id="@+id/total_hours_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/sleep_textview"
+        android:layout_marginTop="20dp"
+        android:padding="20dp"
+        android:text="@string/total_hours_text_empty"
+        android:textColor="@color/inspire"
+        android:textSize="30sp" />
+
+    <Button
+        android:id="@+id/sleep_done_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:padding="5dp"
+        android:layout_margin="15dp"
+        android:text="@string/done" />
+
+    <Switch
+        android:id="@+id/sleep_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/sleep_textview"
+        android:layout_below="@+id/chronometer"
+        android:layout_marginTop="50dp"
+        android:textOff="@string/switch_awake"
+        android:textOn="@string/switch_sleeping" 
+        />
+
+    <Chronometer
+        android:id="@+id/chronometer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/total_hours_textview"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="14dp"
+        android:background="@color/inspire"
+        android:textSize="50sp" />
+
+</RelativeLayout>
