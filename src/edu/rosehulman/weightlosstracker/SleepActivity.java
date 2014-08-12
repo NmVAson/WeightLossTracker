@@ -61,12 +61,8 @@ public class SleepActivity extends Activity implements OnClickListener{
 					setSleepTime();
 					setTimeText(mSleepTime.getHours(), mSleepTime.getMinutes(), mSleepTime.getSeconds());
 				}
-				
 			}
-
-
 		});
-		
 	}
 
 	@Override
@@ -78,8 +74,6 @@ public class SleepActivity extends Activity implements OnClickListener{
 				//this.moveTaskToBack(true);
 				setResult(MainActivity.RESULT_CODE_SLEEP_IN_PROGRESS);
 				//finish();
-				
-
 			}
 			else {
 				Log.d(SLEEP, "Exiting SleepActivity with chronometer stopped");
@@ -98,10 +92,10 @@ public class SleepActivity extends Activity implements OnClickListener{
 		Log.d(SLEEP, "Returning from SleepActivity's OnClick method");
 	}
 	
-	@Override
-	public void onBackPressed() {
-		this.moveTaskToBack(true);
-	}
+//	@Override
+//	public void onBackPressed() {
+//		this.moveTaskToBack(true);
+//	}
 	
 	private void setTimeText(int hours, int minutes, int seconds) {
 		if( (hours == 0) && (minutes == 0) && (seconds == 0)) {

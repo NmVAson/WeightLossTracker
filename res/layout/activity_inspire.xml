@@ -22,7 +22,7 @@
         android:textStyle="italic" />
 
     <Button
-        android:id="@+id/inspire_new_button"
+        android:id="@+id/inspire_close_button"
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -34,10 +34,12 @@
         android:textColor="@color/inspire" />
 
     <Button
-        android:id="@+id/inspire_close_button"
+        android:id="@+id/inspire_new_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/inspire_new_button"
+        android:layout_below="@+id/inspire_textview"
+        android:textSize="30sp"
+        android:layout_marginTop="50dp"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="52dp"
         android:text="@string/more"

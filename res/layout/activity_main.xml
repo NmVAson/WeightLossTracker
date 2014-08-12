@@ -30,13 +30,30 @@
         android:gravity="center_vertical|center_horizontal"
         android:orientation="vertical" >
 
-        <ToggleButton
-            android:id="@+id/main_start_end_button"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textOff="@string/initial_setup_button_label"
-            android:textOn="@string/end_button_label"
-            android:textSize="30sp" />
+            android:orientation="horizontal" >
+
+            <ToggleButton
+                android:id="@+id/main_start_end_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textOff="@string/initial_setup_button_label"
+                android:textOn="@string/end_button_label"
+                android:textSize="30sp" />
+
+            <ImageView
+                android:id="@+id/camera_image_view"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="25dp"
+                android:contentDescription="@string/hello_world"
+                android:scaleX="2"
+                android:scaleY="2"
+                android:src="@android:drawable/ic_menu_camera" />
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/main_daily_button"
