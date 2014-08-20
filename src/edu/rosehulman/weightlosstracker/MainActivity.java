@@ -232,7 +232,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			dialog.setTitle(R.string.daily_title);
 			
 			final EditText weightET = (EditText) findViewById(R.id.weight);
-			final Button weightButton = (Button) findViewById(R.id.weight_log_button);
+			final Button setButton = (Button) findViewById(R.id.weight_log_button);
 			final Button foodButton = (Button) findViewById(R.id.food_log_button);
 			final Button activityButton = (Button) findViewById(R.id.activity_log_button);
 			final Button closeButton = (Button) findViewById(R.id.close_daily);
@@ -240,19 +240,48 @@ public class MainActivity extends Activity implements OnClickListener {
 			final TextView daysTV = (TextView) findViewById(R.id.days_left);
 			final ProgressBar progress = (ProgressBar) findViewById(R.id.progressBar);
 			
-			int daysTotal = 0;
+			Calendar end = Calendar.getInstance();
 			int goalWeight = 0;
-			Cursor cursor = db.query("person", new String[] {"weight","days"}, null, null, null, null, null, null);
+			Cursor cursor = db.query("person", new String[] {"weight","endD","endM","endY"}, null, null, null, null, null, null);
 			if(cursor.moveToLast()){
 				goalWeight = cursor.getInt(cursor.getColumnIndex("weight"));
-				daysTotal = cursor.getInt(cursor.getColumnIndex("days"));
+				int day = cursor.getInt(cursor.getColumnIndex("endD"));
+				int month = cursor.getInt(cursor.getColumnIndex("endM"));
+				int year = cursor.getInt(cursor.getColumnIndex("endY"));
+				end.set(year, month, day);
 			} else {
 				cursor.close();
 				System.out.print("ERR: Can't return person info.");
 			}
 			Resources res = getResources();
-			calsTV.setText(res.getString(R.string.calories_left, name));
+			//calsTV.setText(res.getString(R.string.calories_left, name));
+			daysTV.setText(res.getString(R.string.day_countdown, getDurration(end)));
 			
+			setButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					
+				}	
+			});
+			foodButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					
+				}	
+			});
+			activityButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					
+				}	
+			});
+			closeButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					dialog.dismiss();
+				}	
+			});
+		
 			
 			break;
 		case CHALLENGE_DIALOG_ID:

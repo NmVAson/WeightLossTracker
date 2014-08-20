@@ -26,7 +26,7 @@
     <string name="daily_title">Day-To-Day Tracking</string>
     <string name="weight_hint">Enter your weight</string>
     <string name="food_log">Food Log</string>
-    <string name="weight_log">Weight Log</string>
+    <string name="weight_log">Submit</string>
     <string name="exercise_log">Exercise Log</string>
     <string name="calories_left">You can consume %1$s more calories today.</string>
     <string name="day_countdown">Only %1$s days left!</string>

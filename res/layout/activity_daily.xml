@@ -7,11 +7,14 @@
     android:layout_gravity="center_vertical"
     android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/weight_log_button"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/weight_log" />
+        android:orientation="horizontal" >
+        
+
+	    
+    </LinearLayout>
     
     <Button
         android:id="@+id/food_log_button"
@@ -29,6 +32,8 @@
         android:id="@+id/cals_left"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="center"
         android:text="@string/calories_left"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
