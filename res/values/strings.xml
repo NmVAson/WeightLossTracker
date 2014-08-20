@@ -26,8 +26,9 @@
     <string name="daily_title">Day-To-Day Tracking</string>
     <string name="weight_hint">Enter your weight</string>
     <string name="food_log">Food Log</string>
+    <string name="weight_log">Weight Log</string>
     <string name="exercise_log">Exercise Log</string>
-    <string name="calories_left">%1$s</string>
+    <string name="calories_left">You can consume %1$s more calories today.</string>
     <string name="day_countdown">Only %1$s days left!</string>
     <string name="challenge_title">Challenge Yourself</string>
     <string name="initial_challenge">Let the activities begin!</string>
@@ -39,5 +40,6 @@
     <string name="switch_sleeping">Sleeping</string>
     <string name="title_activity_sleep">SleepActivity</string>
     <string name="done">Done</string>
+    <string name="recipe_activity_title">Random Recipe of The Day</string>
 
 </resources>
