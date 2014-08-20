@@ -7,17 +7,12 @@
     android:layout_gravity="center_vertical"
     android:orientation="vertical" >
 
-    <EditText
-        android:id="@+id/weight"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/weight_log_button"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint = "@string/weight_hint"
-        android:inputType="number" >
-
-        <requestFocus />
-    </EditText>
-
+        android:text="@string/weight_log" />
+    
     <Button
         android:id="@+id/food_log_button"
         android:layout_width="wrap_content"
@@ -29,12 +24,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/exercise_log" />
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:progress="0" />
 
     <TextView
         android:id="@+id/cals_left"
@@ -49,6 +38,12 @@
         android:layout_height="wrap_content"
         android:text="@string/day_countdown"
         android:textAppearance="?android:attr/textAppearanceMedium" />
+    
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:progress="0" />
 
     <Button
         android:id="@+id/close_daily"

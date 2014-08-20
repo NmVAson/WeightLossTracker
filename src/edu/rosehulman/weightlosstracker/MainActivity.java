@@ -2,14 +2,19 @@ package edu.rosehulman.weightlosstracker;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
+import android.R;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.hardware.Camera;
@@ -21,21 +26,26 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+
 
 public class MainActivity extends Activity implements OnClickListener {
 
+	private SQLHelper dbHelper;
+	private SQLiteDatabase db;
+	
+	private String usrName;
 	private Button mStartStopButton;
 	private Button mDailyButton;
 	private Button mChallengeButton;
 	private Button mInspireButton;
 	private TextView mWelcomeText;
-	private Date endDate;
-	private int goalLoss;
 	protected ArrayList<SleepTime> mSleepTimes;
 	private Button mSleepTrackerButton;
 	private ImageView mCameraImageView;
@@ -48,6 +58,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int DAILY_DIALOG_ID = 1;
 	private static final int CHALLENGE_DIALOG_ID = 2;
 	private static final int INSPIRE_DIALOG_ID = 3;
+	private static final int RECIPE_DIALOG_ID = 4;
 
 	// Log filter values
 	private static final String MAIN = "MAIN";
@@ -66,6 +77,9 @@ public class MainActivity extends Activity implements OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		db = dbHelper.getWritableDatabase();
+		
 		setContentView(R.layout.activity_main);
 
 		Resources res = getResources();
@@ -119,6 +133,12 @@ public class MainActivity extends Activity implements OnClickListener {
 			Intent inspireIntent = new Intent(this, RandomInspiration.class);
 			startActivity(inspireIntent);
 			break;
+		case R.id.main_recipe_button:
+			Log.d(MAIN, "Random Recipe button clicked");
+			// Intent challenge = new Intent(this, RandomChallenge.class);
+			// startActivity(challenge);
+			showDialog(RECIPE_DIALOG_ID);
+			break;
 		case R.id.main_track_sleep_button:
 			Log.d(MAIN, "Track Sleep button clicked");
 			Intent sleepIntent = new Intent(this, SleepActivity.class);
@@ -171,13 +191,31 @@ public class MainActivity extends Activity implements OnClickListener {
 					int month = endDate.getMonth();
 					int day = endDate.getDayOfMonth();
 					int year = endDate.getYear();
+					Calendar end = Calendar.getInstance();
+					end.set(year, month, day);
 					if (nameText.getText().length() > 0
 							&& goalText.getText().length() > 0) {
-						setWelcomeText(nameText.getText().toString() + "'s");
-						setEndDate(new Date(year, month, day));
-						setGoalLost(Integer.parseInt(goalText.getText()
+						
+						ContentValues values = new ContentValues();
+						values.put("name",nameText.getText().toString());
+						//values.put("age", value);
+						values.put("weight", Integer.parseInt(goalText.getText()
 								.toString()));
+						values.put("endD", day);
+						values.put("endM", month);
+						values.put("endY", year);
+						long success = db.insert("person", null, values);
+						if(success == -1){
+							System.out.print("ERR: Could not insert initial values into 'person' table");
+						} else {
+							System.out.print("SUCCESS: New person initialized.");
+						}
+						
+						setWelcomeText(nameText.getText().toString() + "'s");
+//						setGoalLost(Integer.parseInt(goalText.getText()
+//								.toString()));
 					}
+					
 					dialog.dismiss();
 				}
 			});
@@ -192,46 +230,131 @@ public class MainActivity extends Activity implements OnClickListener {
 		case DAILY_DIALOG_ID:
 			dialog.setContentView(R.layout.activity_daily);
 			dialog.setTitle(R.string.daily_title);
+			
+			final EditText weightET = (EditText) findViewById(R.id.weight);
+			final Button weightButton = (Button) findViewById(R.id.weight_log_button);
+			final Button foodButton = (Button) findViewById(R.id.food_log_button);
+			final Button activityButton = (Button) findViewById(R.id.activity_log_button);
+			final Button closeButton = (Button) findViewById(R.id.close_daily);
+			final TextView calsTV = (TextView) findViewById(R.id.cals_left);
+			final TextView daysTV = (TextView) findViewById(R.id.days_left);
+			final ProgressBar progress = (ProgressBar) findViewById(R.id.progressBar);
+			
+			int daysTotal = 0;
+			int goalWeight = 0;
+			Cursor cursor = db.query("person", new String[] {"weight","days"}, null, null, null, null, null, null);
+			if(cursor.moveToLast()){
+				goalWeight = cursor.getInt(cursor.getColumnIndex("weight"));
+				daysTotal = cursor.getInt(cursor.getColumnIndex("days"));
+			} else {
+				cursor.close();
+				System.out.print("ERR: Can't return person info.");
+			}
+			Resources res = getResources();
+			calsTV.setText(res.getString(R.string.calories_left, name));
+			
+			
 			break;
 		case CHALLENGE_DIALOG_ID:
 			dialog.setContentView(R.layout.activity_challenge);
 			dialog.setTitle(R.string.challenge_title);
 			final TextView challengeView = (TextView) findViewById(R.id.challenge_textview);
+			final Button newActButton = (Button) findViewById(R.id.challenge_new_button);
+			final Button closeActButton = (Button) findViewById(R.id.challenge_close_button);
+
+			newActButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Random r = new Random();
+					int id = r.nextInt(dbHelper.getNumActivities());
+					String activity = null;
+					Cursor cursor = db.query("randoms", new String[] {"text"}, "type='activity' AND id=?", new String[] {id+""}, null, null, null, null);
+					if(cursor.moveToFirst()){
+						do{
+							activity = cursor.getString(cursor.getColumnIndex("text"));
+						} while  (cursor.moveToNext());
+					} else {
+						cursor.close();
+						System.out.print("ERR: Can't return activity quote.");
+					}
+					challengeView.setText(activity);
+				}
+			});
+
+			closeActButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					dialog.dismiss();
+				}
+			});
 			break;
 		case INSPIRE_DIALOG_ID:
 			dialog.setContentView(R.layout.activity_inspire);
 			dialog.setTitle(R.string.inspire_title);
-			final String[] quoteList = {
-					"If it's to be, it's up to me!",
-					"Take care of your body. It's the only place you have to live!",
-					"The best revenge on a gain is an even biffer loss. Vengence can feel good!",
-					"Persevere and you will win the prize.",
-					"It comes down to a simple question: what do you want out of life, and what are you willing to do to get it?",
-					"Rather than aiming for being perfect, just aim to be little bit better today than you were yesterday." };
-
+	
 			final TextView quoteView = (TextView) findViewById(R.id.inspire_textview);
-			final Button newButton = (Button) findViewById(R.id.inspire_new_button);
-			final Button closeButton = (Button) findViewById(R.id.inspire_close_button);
+			final Button newInspireButton = (Button) findViewById(R.id.inspire_new_button);
+			final Button closeInspireButton = (Button) findViewById(R.id.inspire_close_button);
 
-			newButton.setOnClickListener(new OnClickListener() {
+			newInspireButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					Resources res = getResources();
 					Random r = new Random();
-					String randomQuote = res.getString(R.string.inspire_quote,
-							quoteList[r.nextInt(quoteList.length - 1)]);
-					quoteView.setText(randomQuote);
-
+					int id = r.nextInt(dbHelper.getNumQuotes());
+					String quote = null;
+					Cursor cursor = db.query("randoms", new String[] {"text"}, "type='quote' AND id=?", new String[] {id+""}, null, null, null, null);
+					if(cursor.moveToFirst()){
+						do{
+							quote = cursor.getString(cursor.getColumnIndex("text"));
+						} while  (cursor.moveToNext());
+					} else {
+						cursor.close();
+						System.out.print("ERR: Can't return random quote.");
+					}
+					quoteView.setText(quote);
 				}
 			});
 
-			closeButton.setOnClickListener(new OnClickListener() {
+			closeInspireButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					dialog.dismiss();
 				}
 			});
 
+			break;
+		case RECIPE_DIALOG_ID:
+			dialog.setContentView(R.layout.activity_recipe);
+			dialog.setTitle(R.string.challenge_title);
+			final WebView page = (WebView) findViewById(R.id.wb_webview);
+			final Button newRecipeButton = (Button) findViewById(R.id.recipe_new_button);
+			final Button closeRecipeButton = (Button) findViewById(R.id.recipe_close_button);
+
+			newRecipeButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Random r = new Random();
+					int id = r.nextInt(dbHelper.getNumActivities());
+					String recipe = null;
+					Cursor cursor = db.query("randoms", new String[] {"text"}, "type='recipe' AND id=?", new String[] {id+""}, null, null, null, null);
+					if(cursor.moveToFirst()){
+						do{
+							recipe = cursor.getString(cursor.getColumnIndex("text"));
+						} while  (cursor.moveToNext());
+					} else {
+						cursor.close();
+						System.out.print("ERR: Can't return activity quote.");
+					}
+					page.loadUrl(recipe);
+				}
+			});
+
+			closeRecipeButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					dialog.dismiss();
+				}
+			});
 			break;
 		default:
 			break;
@@ -240,19 +363,26 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
 	private void setWelcomeText(String name) {
+		this.usrName = name;
 		Resources res = getResources();
 		this.mWelcomeText.setText(res.getString(R.string.welcome_text, name));
 	}
 
-	private void setEndDate(Date date) {
-		Resources res = getResources();
-		this.endDate = date;
+	private int getDurration(Calendar endDate) {
+		Calendar startDate = Calendar.getInstance();
+		Calendar date = (Calendar) startDate.clone();  
+		  int daysBetween = 0;  
+		  while (date.before(endDate)) {  
+		    date.add(Calendar.DAY_OF_MONTH, 1);  
+		    daysBetween++;  
+		  }
+		return daysBetween;
 	}
 
-	private void setGoalLost(int goal) {
-		this.goalLoss = goal;
-
-	}
+//	private void setGoalLost(int goal) {
+//		this.goalLoss = goal;
+//
+//	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
