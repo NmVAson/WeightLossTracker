@@ -123,7 +123,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.main_start_end_button:
-			ContentValues values = new ContentValues();
+			final ContentValues values = new ContentValues();
 			if(mStartStopButton.isChecked()){
 				showDialog(INITIALIZE_DIALOG_ID);
 				values.put("isdone", FALSE);
@@ -238,7 +238,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					
 					Calendar end = Calendar.getInstance();
 					end.set(year, month, day);
-					long calsPerDay;
+					long calsPerDay=0;
 					if (nameText.getText().length() > 0
 							&& weightText.getText().length() > 0) {
 						
@@ -309,13 +309,13 @@ public class MainActivity extends Activity implements OnClickListener {
 			
 			Calendar end = Calendar.getInstance();
 			
-			int age,height,isMale = 0,actualWeight;
+			int age = 0,height = 0,isMale = 0,actualWeight = 0;
 			Cursor cursor = db.query("person", new String[] {"age","height","weightend","endD","endM","endY","ismale"}, null, null, null, null, null, null);
 			if(cursor.moveToLast()){
 				
 				age = cursor.getInt(cursor.getColumnIndex("age"));
 				height = cursor.getInt(cursor.getColumnIndex("height"));
-				goalWeight = cursor.getInt(cursor.getColumnIndex("weight"));
+				goalWeight = cursor.getInt(cursor.getColumnIndex("weightend"));
 				int day = cursor.getInt(cursor.getColumnIndex("endD"));
 				int month = cursor.getInt(cursor.getColumnIndex("endM"));
 				int year = cursor.getInt(cursor.getColumnIndex("endY"));
@@ -350,7 +350,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			cursorCals.close();
 			
 			//GET TODAYS CALS BURNED
-			Cursor cursorBurned = db.rawQuery("SELECT SUM(cals) FROM activity WHERE date="+dateToString(Calendar.getInstance()),null);
+			Cursor cursorBurned = db.rawQuery("SELECT SUM(calsburned) FROM activity WHERE date="+dateToString(Calendar.getInstance()),null);
 			int calsBurned;
 			if(cursorBurned.moveToFirst()){
 				calsBurned = cursorBurned.getInt(0);
@@ -396,18 +396,18 @@ public class MainActivity extends Activity implements OnClickListener {
 			foodButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					Resources res = getResources();
 					AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 					// Add the buttons
 					 LayoutInflater inflater = MainActivity.this.getLayoutInflater();
 
 					    // Inflate and set the layout for the dialog
 					    // Pass null as the parent view because its going in the dialog layout
-					builder.setView(inflater.inflate(R.layout.dialog_food, null));
+					View thisView = inflater.inflate(R.layout.dialog_food, null);
+					builder.setView(thisView);
 					
-					final EditText foodName = (EditText) findViewById(R.id.food_name);
-					final Spinner spinner = (Spinner) findViewById(R.id.food_type_spinner);
-					final EditText foodCals = (EditText) findViewById(R.id.food_calories);
+					final EditText foodName = (EditText) thisView.findViewById(R.id.food_name);
+					final Spinner spinner = (Spinner) thisView.findViewById(R.id.food_type_spinner);
+					final EditText foodCals = (EditText) thisView.findViewById(R.id.food_calories);
 					
 					builder.setPositiveButton(R.string.submit, new DialogInterface.OnClickListener() {
 					           public void onClick(DialogInterface alertDialog, int id) {
@@ -466,17 +466,17 @@ public class MainActivity extends Activity implements OnClickListener {
 			activityButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					Resources res = getResources();
 					AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 					// Add the buttons
 					 LayoutInflater inflater = MainActivity.this.getLayoutInflater();
 
 					    // Inflate and set the layout for the dialog
 					    // Pass null as the parent view because its going in the dialog layout
-					builder.setView(inflater.inflate(R.layout.dialog_activity, null));
+					 View thisView = inflater.inflate(R.layout.dialog_activity, null);
+					builder.setView(thisView);
 					
-					final EditText actName = (EditText) findViewById(R.id.activity_name);
-					final EditText actCals = (EditText) findViewById(R.id.burned_calories);
+					final EditText actName = (EditText) thisView.findViewById(R.id.activity_name);
+					final EditText actCals = (EditText) thisView.findViewById(R.id.burned_calories);
 					
 					builder.setPositiveButton(R.string.submit, new DialogInterface.OnClickListener() {
 					           public void onClick(DialogInterface alertDialog, int id) {
@@ -656,7 +656,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		if(isMale){
 			natural = Math.round(66 + (6.23*actualWeight) + (12.7*height) - (6.8*age));
 		}else {
-			natural = Math.round(655 + (4.35*actualWeight) + (4.7*height) - (4.7*age));
+			natural = Math.round(65 + (4.35*actualWeight) + (4.7*height) - (4.7*age));
 		}
 		long calsBurnPerDay = Math.round((actualWeight - goalWeight)*(3500.0/days));
 		return natural-calsBurnPerDay;
