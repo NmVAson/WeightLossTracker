@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_gravity="center_vertical"
+    android:background="@drawable/daily"
+    android:gravity="center_vertical|center_horizontal"
+    android:orientation="vertical">
+    
+    <EditText
+	     android:id="@+id/food_name"
+	     android:layout_width="match_parent"
+	     android:layout_height="wrap_content"
+	     android:ems="10"
+	     android:hint = "@string/name"
+	     android:inputType="text" >
+	</EditText>
+	
+	<Spinner
+	    android:id="@+id/food_type_spinner"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content" />
+    
+    <EditText
+	     android:id="@+id/food_calories"
+	     android:layout_width="match_parent"
+	     android:layout_height="wrap_content"
+	     android:ems="10"
+	     android:hint = "@string/calories"
+	     android:inputType="number" >
+	</EditText>
+
+</LinearLayout>

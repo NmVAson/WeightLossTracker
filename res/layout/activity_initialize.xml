@@ -4,6 +4,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
     
+    <ToggleButton
+    	android:id="@+id/dialogAddGender"
+    	android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+    	android:textOff="@string/female"
+        android:textOn="@string/male">
+    </ToggleButton>
+    
     <EditText
     	android:id="@+id/dialogAddName"
     	android:layout_width="match_parent"
@@ -14,12 +22,27 @@
     </EditText>
     
     <EditText
+    	android:id="@+id/dialogAddAge"
+    	android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+    	android:ems="10"
+    	android:hint="@string/enter_age_hint" >
+    </EditText>
+    
+    <EditText
+    	android:id="@+id/dialogAddHeight"
+    	android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+    	android:ems="10"
+    	android:hint="@string/enter_height_hint" >
+    </EditText>
+    
+    <EditText
     	android:id="@+id/dialogAddGoalWeight"
     	android:layout_width="match_parent"
     	android:layout_height="wrap_content"
     	android:ems="10"
     	android:hint="@string/enter_goal_hint" >
-        <requestFocus />
     </EditText>
     
      <TextView

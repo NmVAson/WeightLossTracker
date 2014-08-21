@@ -9,7 +9,7 @@ import android.util.Log;
 public class SQLHelper extends SQLiteOpenHelper {
 
 	  private static final String DATABASE_NAME = "wltracker.db";
-	  private static final int DATABASE_VERSION = 2;
+	  private static final int DATABASE_VERSION = 3;
 	  private static final String[] quoteList = {
 			"If it's to be, it's up to me!",
 			"Take care of your body. It's the only place you have to live!",
@@ -42,14 +42,17 @@ public class SQLHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL("CREATE TABLE IF NOT EXISTS person (id       INTEGER PRIMARY KEY AUTOINCREMENT,"
-													  +"name	TEXT,"
-													  +"age		INTEGER,"
-													  +"weight	INTEGER,"
-													  +"endD	INTEGER,"
-													  +"endM	INTEGER,"
-													  +"endY	INTEGER,"
-													  +"isdone	INTEGER"
+		db.execSQL("CREATE TABLE IF NOT EXISTS person (id       	INTEGER PRIMARY KEY AUTOINCREMENT,"
+													  +"name		TEXT,"
+													  +"age			INTEGER,"
+													  +"height		INTEGER,"
+													  +"weightstart	INTEGER,"
+													  +"weightend	INTEGER,"
+													  +"endD		INTEGER,"
+													  +"endM		INTEGER,"
+													  +"endY		INTEGER,"
+													  +"ismale		INTEGER,"
+													  +"isdone		INTEGER"
 													  +");");
 		
 		Log.d("dbug","Created 'person'");

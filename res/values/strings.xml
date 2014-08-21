@@ -15,10 +15,13 @@
     <string name="initial_title">Start Tracking</string>
     <string name="recipe_title">Try a Random Recipe</string>
     <string name="enter_name_hint">Enter your name</string>
-    <string name="enter_goal_hint">Enter desired loss</string>
+    <string name="enter_goal_hint">Current_Weight,Desired_Weight</string>
+    <string name="enter_age_hint">Age</string>
+    <string name="enter_height_hint">Height: feet,inches</string>
     <string name="end_date_label">Select End Date</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="calc_title">Your Calculation</string>
     <string name="calculation">In order to reach your goal weight, you must limit yourself to %1$s per day.</string>
     <string name="inspire_title">Inspire Yourself</string>
     <string name="inspire_quote">%1$s</string>
@@ -26,7 +29,7 @@
     <string name="close">Close</string>
     <string name="more">Give Me Another</string>
     <string name="daily_title">Day-To-Day Tracking</string>
-    <string name="weight_hint">Enter your weight</string>
+    <string name="weight_hint">Enter amount to lose (lbs)</string>
     <string name="food_log">Food Log</string>
     <string name="weight_log_submit">Submit Weight</string>
     <string name="weight_log_update">Update Weight</string>
@@ -44,5 +47,19 @@
     <string name="title_activity_sleep">SleepActivity</string>
     <string name="done">Done</string>
     <string name="recipe_activity_title">Random Recipe of The Day</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="submit">Submit</string>
+    <string name="calories">Calories</string>
+    <string name="name">Name of Food</string>
+     <string-array name="food_types">
+        <item>Dairy</item>
+        <item>Fruit</item>
+        <item>Grain</item>
+        <item>Meat</item>
+        <item>Sweets</item>
+        <item>Vegetables</item>
+        <item>Alcohol</item>
+    </string-array>
 
 </resources>
