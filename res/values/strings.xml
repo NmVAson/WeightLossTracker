@@ -20,6 +20,8 @@
     <string name="enter_height_hint">Height: feet,inches</string>
     <string name="end_date_label">Select End Date</string>
     <string name="ok">OK</string>
+    <string name="yes">Yes</string>
+    <string name="are_you_sure">Are you sure you'd like to end this track?</string>
     <string name="cancel">Cancel</string>
     <string name="calc_title">Your Calculation</string>
     <string name="calculation">In order to reach your goal weight, you must limit yourself to %1$s per day.</string>

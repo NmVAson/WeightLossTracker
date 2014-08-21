@@ -124,7 +124,23 @@ public class MainActivity extends Activity implements OnClickListener {
 				showDialog(INITIALIZE_DIALOG_ID);
 				value = FALSE;
 			} else {
-				value = TRUE;
+				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+		        builder.setMessage(R.string.are_you_sure)
+		               .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+		                   public void onClick(DialogInterface dialog, int id) {
+		                	   value = TRUE;
+		                       dialog.dismiss();
+		                   }
+		               })
+		               .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+		                   public void onClick(DialogInterface dialog, int id) {
+		                	   value = FALSE;
+		                       dialog.cancel();
+		                   }
+		               });
+		        // Create the AlertDialog object and return it
+		        builder.create();
+				
 			}
 			values.put("isdone", value);
 			db.update("person", values, "id=?", new String[]{usrID+""});
@@ -289,19 +305,61 @@ public class MainActivity extends Activity implements OnClickListener {
 			
 			Calendar end = Calendar.getInstance();
 			
-			Cursor cursor = db.query("person", new String[] {"weight","endD","endM","endY"}, null, null, null, null, null, null);
+			int age,height,isMale,actualWeight;
+			Cursor cursor = db.query("person", new String[] {"age","height","weightend","endD","endM","endY","ismale"}, null, null, null, null, null, null);
 			if(cursor.moveToLast()){
+				
+				age = cursor.getInt(cursor.getColumnIndex("age"));
+				height = cursor.getInt(cursor.getColumnIndex("height"));
 				goalWeight = cursor.getInt(cursor.getColumnIndex("weight"));
 				int day = cursor.getInt(cursor.getColumnIndex("endD"));
 				int month = cursor.getInt(cursor.getColumnIndex("endM"));
 				int year = cursor.getInt(cursor.getColumnIndex("endY"));
+				isMale = cursor.getInt(cursor.getColumnIndex("ismale"));
+				
 				end.set(year, month, day);
+				
 			} else {
-				cursor.close();
+				
 				Log.d("dbug","ERR: Can't return person info.");
 			}
+			cursor.close();
+			
+			//GET CURRENT WEIGHT
+			Cursor cursor = db.query("weight", new String[] {"weight"}, null, null, null, null, null, null);
+			if(cursor.moveToLast()){
+				actualWeight = cursor.getInt(cursor.getColumnIndex("weight"));
+			} else {
+				Log.d("dbug","ERR: Can't return weight info.");
+			}
+			cursor.close();
+			
+			//GET TODAYS CALS CONSUMED
+			Cursor cursor = db.rawQuery("SELECT SUM(cals) FROM food WHERE date="+dateToString(Calendar.getInstance()));
+			int calsConsumed;
+			if(cursor.moveToFirst()){
+				calsConsumed = cursor.getInt(0);
+			} else {
+				calsConsumed = 0;
+				Log.d("dbug","ERR: Can't return cals consumed.");
+			}
+			cursor.close();
+			
+			//GET TODAYS CALS BURNED
+			Cursor cursor = db.rawQuery("SELECT SUM(cals) FROM activity WHERE date="+dateToString(Calendar.getInstance()));
+			int calsBurned;
+			if(cursor.moveToFirst()){
+				calsBurned = cursor.getInt(0);
+			} else {
+				calsBurned = 0;
+				Log.d("dbug","ERR: Can't return cals burned.");
+			}
+			cursor.close();
+			
+			int calsAllowed = calculateCalories(isMale == TRUE, height, age, actualWeight, goalWeight, getDurration(end));
+			int calsLeft = calsAllowed-calsConsumed+calsBurned;
 			Resources res = getResources();
-			//calsTV.setText(res.getString(R.string.calories_left, name));
+			calsTV.setText(res.getString(R.string.calories_left, calsLeft));
 			daysTV.setText(res.getString(R.string.day_countdown, getDurration(end)));
 			
 			setButton.setOnClickListener(new OnClickListener() {
@@ -619,6 +677,20 @@ public class MainActivity extends Activity implements OnClickListener {
 				SleepTime sleepTime = new SleepTime(date, hours, minutes,
 						seconds);
 				this.mSleepTimes.add(sleepTime); // TODO: Implement comparable
+				
+				//SUBMIT TO DATABASE
+				CurrentValues values = new CurrentValues();
+				values.put("date",dateToString(Calendar.getInstance().set(date.year(),date.month(),date.dayOfMonth())));
+				values.put("hr",hours);
+				values.put("min",minutes);
+				values.put("sec",seconds);
+				long success = db.insert("sleep", null, values);
+				if(success == -1){
+					Log.d("dbug","ERR: Could not insert into 'sleep' table");
+				} else {
+					Log.d("dbug","SUCCESS: New sleep logged.");
+				}
+				
 			} else if (resultCode == RESULT_CODE_SLEEP_IN_PROGRESS) {
 				Log.d(MAIN,
 						"Resulted from SleepActivity with sleep IN PROGRESS");

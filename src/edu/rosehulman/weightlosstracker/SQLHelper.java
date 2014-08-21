@@ -74,13 +74,11 @@ public class SQLHelper extends SQLiteOpenHelper {
 														+"calsburned	INTEGER"
 														+");");
 		Log.d("dbug","Created 'activity'");
-		db.execSQL("CREATE TABLE IF NOT EXISTS sleep (id        INTEGER PRIMARY KEY AUTOINCREMENT,"
-													+"date		TEXT,"
-												    +"sleephr	INTEGER,"
-												    +"sleepmin	INTEGER,"
-												    +"wakehr	INTEGER,"
-												    +"wakemin	INTEGER,"
-												    +"hrs		INTEGER"
+		db.execSQL("CREATE TABLE IF NOT EXISTS sleep (id    INTEGER PRIMARY KEY AUTOINCREMENT,"
+													+"date	TEXT,"
+												    +"hr	INTEGER,"
+												    +"min	INTEGER,"
+												    +"sec	INTEGER"
 												    +");");
 		Log.d("dbug","Created 'sleep'");
 		db.execSQL("CREATE TABLE IF NOT EXISTS randoms (id			INTEGER PRIMARY KEY AUTOINCREMENT,"
