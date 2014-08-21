@@ -446,18 +446,6 @@ public class MainActivity extends Activity implements OnClickListener {
 					adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 					// Apply the adapter to the spinner
 					spinner.setAdapter(adapter);
-//					spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-//						public void onItemSelected(AdapterView<?> parent, View view, 
-//					            int pos, long id) {
-//					        // An item was selected. You can retrieve the selected item using
-//					        // parent.getItemAtPosition(pos)
-//							
-//					    }
-//
-//					    public void onNothingSelected(AdapterView<?> parent) {
-//					        // Another interface callback
-//					    }
-//					});
 					// Create the AlertDialog
 					AlertDialog alertDialog = builder.create();
 					
