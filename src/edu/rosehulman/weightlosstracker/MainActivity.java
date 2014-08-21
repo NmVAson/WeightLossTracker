@@ -45,6 +45,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Button mChallengeButton;
 	private Button mInspireButton;
 	private Button mRecipeButton;
+	private Button mSummariesButton;
 	private TextView mWelcomeText;
 	protected ArrayList<SleepTime> mSleepTimes;
 	private Button mSleepTrackerButton;
@@ -60,6 +61,12 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int CHALLENGE_DIALOG_ID = 2;
 	private static final int INSPIRE_DIALOG_ID = 3;
 	private static final int RECIPE_DIALOG_ID = 4;
+	private static final int SUMMARY_DIALOG_ID = 5;
+	
+	private static final int DATA_WEIGHT_POS = 0;
+	private static final int DATA_ACTIVITY_POS = 1;
+	private static final int DATA_SLEEP_POS = 2;
+	private static final int DATA_FOOD_POS = 3;
 	
 	private static final int TRUE = 1;
 	private static final int FALSE = 0;
@@ -114,6 +121,8 @@ public class MainActivity extends Activity implements OnClickListener {
 		this.mInspireButton.setOnClickListener(this);
 		this.mRecipeButton = (Button) findViewById(R.id.main_recipe_button);
 		this.mRecipeButton.setOnClickListener(this);
+		this.mSummariesButton = (Button) findViewById(R.id.main_summary_button);
+		this.mSummariesButton.setOnClickListener(this);
 		this.mCameraImageView = (ImageView) findViewById(R.id.camera_image_view);
 
 		this.mSleepTimes = new ArrayList<SleepTime>();
@@ -177,6 +186,10 @@ public class MainActivity extends Activity implements OnClickListener {
 		case R.id.main_recipe_button:
 			Log.d(MAIN, "Random Recipe button clicked");
 			showDialog(RECIPE_DIALOG_ID);
+			break;
+		case R.id.main_summary_button:
+			Log.d(MAIN, "Data Summaries button clicked");
+			showDialog(SUMMARY_DIALOG_ID);
 			break;
 		case R.id.main_track_sleep_button:
 			Log.d(MAIN, "Track Sleep button clicked");
@@ -438,15 +451,11 @@ public class MainActivity extends Activity implements OnClickListener {
 				           
 					builder.setTitle(R.string.food_title);
 					
-					
-					// Create an ArrayAdapter using the string array and a default spinner layout
+					//SET UP THE SPINNER
 					ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(MainActivity.this,
 					        R.array.food_types, android.R.layout.simple_spinner_item);
-					// Specify the layout to use when the list of choices appears
 					adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-					// Apply the adapter to the spinner
 					spinner.setAdapter(adapter);
-					// Create the AlertDialog
 					AlertDialog alertDialog = builder.create();
 					
 				}	
@@ -608,6 +617,107 @@ public class MainActivity extends Activity implements OnClickListener {
 					dialog.dismiss();
 				}
 			});
+			break;
+		case SUMMARY_DIALOG_ID:
+			dialog.setContentView(R.layout.data_summary_layout);
+			dialog.setTitle(R.string.summary_title);
+			
+			final Spinner spinner = (Spinner) thisView.findViewById(R.id.summary_type_spinner);
+			
+			//SET UP THE SPINNER
+			ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(MainActivity.this,
+			        R.array.summaries, android.R.layout.simple_spinner_item);
+			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			spinner.setAdapter(adapter);
+			
+			spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+				public void onItemSelected(AdapterView<?> parent, View view, int pos, long id){
+	                
+					GraphViewData[] data;
+					String message;
+					switch(getLastVisiblePosition()){
+					case DATA_WEIGHT_POS:
+						Cursor cursor = db.query("weight", new String[] {"weight"}, null, null, null, null, null, null);
+						int count = 0;
+						if(cursor.moveToFirst()){
+							do{
+								int weight = cursor.getString(cursor.getColumnIndex("weight"));
+								data.add(new GraphViewData(count,weight));
+								count ++;
+							} while  (cursor.moveToNext());
+						} else {
+							cursor.close();
+							Log.d("dbug","ERR: Can't return weight data.");
+						}
+						break;
+					case DATA_ACTIVITY_POS:
+						Cursor cursor = db.rawQuery("SELECT date,SUM(calsburned) AS burned FROM activity GROUP BY date",null);
+						int count = 0;
+						if(cursor.moveToFirst()){
+							do{
+								int cals = cursor.getString(cursor.getColumnIndex("burned"));
+								data.add(new GraphViewData(count,cals));
+								count ++;
+							} while  (cursor.moveToNext());
+						} else {
+							cursor.close();
+							Log.d("dbug","ERR: Can't return activity data.");
+						}
+						break;
+					case  DATA_SLEEP_POS:
+						Cursor cursor = db.query("sleep", new String[] {"hr","min"}, null, null, null, null, null, null);
+						int count = 0;
+						if(cursor.moveToFirst()){
+							do{
+								int hour = cursor.getString(cursor.getColumnIndex("hr"));
+								int min = cursor.getString(cursor.getColumnIndex("min"));
+								double time = hour + (min/60);
+								data.add(new GraphViewData(count,time));
+								count ++;
+							} while  (cursor.moveToNext());
+						} else {
+							cursor.close();
+							Log.d("dbug","ERR: Can't return sleep data.");
+						}
+						break;
+					case DATA_FOOD_POS:
+						//select type, count(type) from table group by type;
+						Cursor cursor = db.rawQuery("SELECT type,COUNT(type) AS count FROM food GROUP BY type",null);
+						message = "Your diet breaks down as follows:\n";
+						if(cursor.moveToFirst()){
+							do{
+								String type = cursor.getString(cursor.getColumnIndex("type"));
+								int count = cursor.getString(cursor.getColumnIndex("count"));
+								message.append(type+"   "+count+"\n");
+							} while  (cursor.moveToNext());
+						} else {
+							cursor.close();
+							Log.d("dbug","ERR: Can't return activity data.");
+						}
+						break;
+					default:
+						break;
+					}
+					
+					LinearLayout layout = (LinearLayout) findViewById(R.id.data_summary_layout); 
+					if(getLastVisiblePosition() != DATA_FOOD_POS){
+						GraphViewSeries thisSeries = new GraphViewSeries(data);
+						GraphView graphView = new LineGraphView(this, "Job Status Graph");  
+						graphView.addSeries(thisSeries); 
+						layout.addView(graphView);  
+					} else {
+						TextView summary = new TextView();
+						summary.setText(message);
+						layout.addView(summary);
+					}
+	            }
+
+	            public void onNothingSelected(AdapterView<?> arg0) {
+	                // do nothing
+	            }
+	                      
+	        });     
 			break;
 		default:
 			break;

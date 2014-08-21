@@ -14,6 +14,7 @@
     <string name="welcome_text">%1$s Algorithmic Weightloss Tracker</string>
     <string name="initial_title">Start Tracking</string>
     <string name="recipe_title">Try a Random Recipe</string>
+    <string name="summary_title">Your Stats</string>
     <string name="enter_name_hint">Enter your name</string>
     <string name="enter_goal_hint">Current_Weight,Desired_Weight</string>
     <string name="enter_age_hint">Age</string>
@@ -31,7 +32,7 @@
     <string name="close">Close</string>
     <string name="more">Give Me Another</string>
     <string name="daily_title">Day-To-Day Tracking</string>
-    <string name="weight_hint">Enter amount to lose (lbs)</string>
+    <string name="weight_hint">Enter Today\'s Weight</string>
     <string name="food_log">Food Log</string>
     <string name="weight_log_submit">Submit Weight</string>
     <string name="weight_log_update">Update Weight</string>
@@ -53,7 +54,7 @@
     <string name="female">Female</string>
     <string name="submit">Submit</string>
     <string name="calories">Calories</string>
-    <string name="name">Name of Food</string>
+    <string name="name">Name</string>
     <string name="food_title">Food Log</string>
     <string name="activity_title">Activity Log</string>
      <string-array name="food_types">
@@ -64,6 +65,12 @@
         <item>Sweets</item>
         <item>Vegetables</item>
         <item>Alcohol</item>
+    </string-array>
+     <string-array name="summaries">
+        <item>Weight v. Time</item>
+        <item>Activity v. Time</item>
+        <item>Sleep v. Time</item>
+        <item>Food Summary</item>
     </string-array>
 
 </resources>

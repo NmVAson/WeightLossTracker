@@ -75,6 +75,13 @@
             android:layout_height="wrap_content"
             android:text="@string/challenge_button_label"
             android:textSize="30sp" />
+            
+        <Button
+            android:id="@+id/main_inspire_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/inspire_button_label"
+            android:textSize="30sp" />
 
         <Button
             android:id="@+id/main_track_sleep_button"
@@ -82,13 +89,15 @@
             android:layout_height="wrap_content"
             android:text="@string/track_sleep_button_label"
             android:textSize="30sp" />
-
-        <Button
-            android:id="@+id/main_inspire_button"
+       
+       	<Button
+            android:id="@+id/main_summary_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/inspire_button_label"
+            android:text="@string/summary_title"
             android:textSize="30sp" />
+
+        
     </LinearLayout>
 
 </RelativeLayout>
