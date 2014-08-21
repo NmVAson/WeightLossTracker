@@ -6,8 +6,10 @@ import java.util.Date;
 import java.util.Random;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -16,14 +18,17 @@ import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -119,22 +124,21 @@ public class MainActivity extends Activity implements OnClickListener {
 		switch (v.getId()) {
 		case R.id.main_start_end_button:
 			ContentValues values = new ContentValues();
-			int value;
 			if(mStartStopButton.isChecked()){
 				showDialog(INITIALIZE_DIALOG_ID);
-				value = FALSE;
+				values.put("isdone", FALSE);
 			} else {
-				AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		        builder.setMessage(R.string.are_you_sure)
 		               .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 		                   public void onClick(DialogInterface dialog, int id) {
-		                	   value = TRUE;
+		                	   values.put("isdone", TRUE);
 		                       dialog.dismiss();
 		                   }
 		               })
 		               .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
 		                   public void onClick(DialogInterface dialog, int id) {
-		                	   value = FALSE;
+		                	   values.put("isdone", FALSE);
 		                       dialog.cancel();
 		                   }
 		               });
@@ -142,7 +146,7 @@ public class MainActivity extends Activity implements OnClickListener {
 		        builder.create();
 				
 			}
-			values.put("isdone", value);
+			
 			db.update("person", values, "id=?", new String[]{usrID+""});
 			Log.d(MAIN, "Initialize button clicked");
 			// Intent initialize = new Intent(this, Initialize.class);
@@ -266,7 +270,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					}
 					
 					Resources res = getResources();
-					AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+					AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 					// Add the buttons
 					builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 					           public void onClick(DialogInterface alertDialog, int id) {
@@ -275,7 +279,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					       });
 					
 					builder.setMessage(res.getString(R.string.calculation,calsPerDay));
-					builder.setTitle(R.string.cals_title);
+					builder.setTitle(R.string.calc_title);
 					// Create the AlertDialog
 					AlertDialog alertDialog = builder.create();
 					
@@ -305,7 +309,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			
 			Calendar end = Calendar.getInstance();
 			
-			int age,height,isMale,actualWeight;
+			int age,height,isMale = 0,actualWeight;
 			Cursor cursor = db.query("person", new String[] {"age","height","weightend","endD","endM","endY","ismale"}, null, null, null, null, null, null);
 			if(cursor.moveToLast()){
 				
@@ -326,37 +330,37 @@ public class MainActivity extends Activity implements OnClickListener {
 			cursor.close();
 			
 			//GET CURRENT WEIGHT
-			Cursor cursor = db.query("weight", new String[] {"weight"}, null, null, null, null, null, null);
-			if(cursor.moveToLast()){
-				actualWeight = cursor.getInt(cursor.getColumnIndex("weight"));
+			Cursor cursorWeight = db.query("weight", new String[] {"weight"}, null, null, null, null, null, null);
+			if(cursorWeight.moveToLast()){
+				actualWeight = cursorWeight.getInt(cursorWeight.getColumnIndex("weight"));
 			} else {
 				Log.d("dbug","ERR: Can't return weight info.");
 			}
-			cursor.close();
+			cursorWeight.close();
 			
 			//GET TODAYS CALS CONSUMED
-			Cursor cursor = db.rawQuery("SELECT SUM(cals) FROM food WHERE date="+dateToString(Calendar.getInstance()));
+			Cursor cursorCals = db.rawQuery("SELECT SUM(cals) FROM food WHERE date="+dateToString(Calendar.getInstance()),null);
 			int calsConsumed;
-			if(cursor.moveToFirst()){
-				calsConsumed = cursor.getInt(0);
+			if(cursorCals.moveToFirst()){
+				calsConsumed = cursorCals.getInt(0);
 			} else {
 				calsConsumed = 0;
 				Log.d("dbug","ERR: Can't return cals consumed.");
 			}
-			cursor.close();
+			cursorCals.close();
 			
 			//GET TODAYS CALS BURNED
-			Cursor cursor = db.rawQuery("SELECT SUM(cals) FROM activity WHERE date="+dateToString(Calendar.getInstance()));
+			Cursor cursorBurned = db.rawQuery("SELECT SUM(cals) FROM activity WHERE date="+dateToString(Calendar.getInstance()),null);
 			int calsBurned;
-			if(cursor.moveToFirst()){
-				calsBurned = cursor.getInt(0);
+			if(cursorBurned.moveToFirst()){
+				calsBurned = cursorBurned.getInt(0);
 			} else {
 				calsBurned = 0;
 				Log.d("dbug","ERR: Can't return cals burned.");
 			}
-			cursor.close();
+			cursorBurned.close();
 			
-			int calsAllowed = calculateCalories(isMale == TRUE, height, age, actualWeight, goalWeight, getDurration(end));
+			int calsAllowed = (int) calculateCalories(isMale == TRUE, height, age, actualWeight, goalWeight, getDurration(end));
 			int calsLeft = calsAllowed-calsConsumed+calsBurned;
 			Resources res = getResources();
 			calsTV.setText(res.getString(R.string.calories_left, calsLeft));
@@ -393,17 +397,17 @@ public class MainActivity extends Activity implements OnClickListener {
 				@Override
 				public void onClick(View v) {
 					Resources res = getResources();
-					AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+					AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 					// Add the buttons
-					 LayoutInflater inflater = getActivity().getLayoutInflater();
+					 LayoutInflater inflater = MainActivity.this.getLayoutInflater();
 
 					    // Inflate and set the layout for the dialog
 					    // Pass null as the parent view because its going in the dialog layout
 					builder.setView(inflater.inflate(R.layout.dialog_food, null));
 					
-					EditText foodName = (EditText) builder.findViewById(R.id.food_name);
-					Spinner spinner = (Spinner) builder.findViewById(R.id.food_type_spinner);
-					EditText foodCals = (EditText) builder.findViewById(R.id.food_calories);
+					final EditText foodName = (EditText) findViewById(R.id.food_name);
+					final Spinner spinner = (Spinner) findViewById(R.id.food_type_spinner);
+					final EditText foodCals = (EditText) findViewById(R.id.food_calories);
 					
 					builder.setPositiveButton(R.string.submit, new DialogInterface.OnClickListener() {
 					           public void onClick(DialogInterface alertDialog, int id) {
@@ -412,7 +416,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					        	   int cals = Integer.parseInt(foodCals.getText().toString());
 					        	   String date = dateToString(Calendar.getInstance());
 					        	   
-					        	   CurrentValues values = new CurrentValues();
+					        	   ContentValues values = new ContentValues();
 					        	   values.put("date",date);
 					        	   values.put("name",name);
 					        	   values.put("type",type);
@@ -432,13 +436,11 @@ public class MainActivity extends Activity implements OnClickListener {
 					           }
 							});
 				           
-					
-					builder.setMessage(res.getString(R.string.calculation,calsPerDay));
-					builder.setTitle(R.string.cals_title);
+					builder.setTitle(R.string.food_title);
 					
 					
 					// Create an ArrayAdapter using the string array and a default spinner layout
-					ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+					ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(MainActivity.this,
 					        R.array.food_types, android.R.layout.simple_spinner_item);
 					// Specify the layout to use when the list of choices appears
 					adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -465,16 +467,16 @@ public class MainActivity extends Activity implements OnClickListener {
 				@Override
 				public void onClick(View v) {
 					Resources res = getResources();
-					AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+					AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 					// Add the buttons
-					 LayoutInflater inflater = getActivity().getLayoutInflater();
+					 LayoutInflater inflater = MainActivity.this.getLayoutInflater();
 
 					    // Inflate and set the layout for the dialog
 					    // Pass null as the parent view because its going in the dialog layout
 					builder.setView(inflater.inflate(R.layout.dialog_activity, null));
 					
-					EditText actName = (EditText) builder.findViewById(R.id.activity_name);
-					EditText actCals = (EditText) builder.findViewById(R.id.burned_calories);
+					final EditText actName = (EditText) findViewById(R.id.activity_name);
+					final EditText actCals = (EditText) findViewById(R.id.burned_calories);
 					
 					builder.setPositiveButton(R.string.submit, new DialogInterface.OnClickListener() {
 					           public void onClick(DialogInterface alertDialog, int id) {
@@ -482,7 +484,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					        	   int cals = Integer.parseInt(actCals.getText().toString());
 					        	   String date = dateToString(Calendar.getInstance());
 					        	   
-					        	   CurrentValues values = new CurrentValues();
+					        	   ContentValues values = new ContentValues();
 					        	   values.put("date",date);
 					        	   values.put("name",name);
 					        	   values.put("cals",cals);
@@ -501,9 +503,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					           }
 							});
 				           
-					
-					builder.setMessage(res.getString(R.string.calculation,calsPerDay));
-					builder.setTitle(R.string.cals_title);
+					builder.setTitle(R.string.activity_title);
 					
 				
 					// Create the AlertDialog
@@ -652,13 +652,13 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 	
 	private long calculateCalories(boolean isMale,int height,int age,int actualWeight,int goalWeight, int days){
-		int natural;
+		long natural;
 		if(isMale){
 			natural = Math.round(66 + (6.23*actualWeight) + (12.7*height) - (6.8*age));
 		}else {
 			natural = Math.round(655 + (4.35*actualWeight) + (4.7*height) - (4.7*age));
 		}
-		int calsBurnPerDay = Math.round((actualWeight - goalWeight)*(3500.0/days));
+		long calsBurnPerDay = Math.round((actualWeight - goalWeight)*(3500.0/days));
 		return natural-calsBurnPerDay;
 	}
 
@@ -679,8 +679,10 @@ public class MainActivity extends Activity implements OnClickListener {
 				this.mSleepTimes.add(sleepTime); // TODO: Implement comparable
 				
 				//SUBMIT TO DATABASE
-				CurrentValues values = new CurrentValues();
-				values.put("date",dateToString(Calendar.getInstance().set(date.year(),date.month(),date.dayOfMonth())));
+				Calendar cal = Calendar.getInstance();
+				cal.set(date.getYear(),date.getMonth(),date.getDate());
+				ContentValues values = new ContentValues();
+				values.put("date",dateToString(cal));
 				values.put("hr",hours);
 				values.put("min",minutes);
 				values.put("sec",seconds);

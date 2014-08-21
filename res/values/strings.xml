@@ -21,7 +21,7 @@
     <string name="end_date_label">Select End Date</string>
     <string name="ok">OK</string>
     <string name="yes">Yes</string>
-    <string name="are_you_sure">Are you sure you'd like to end this track?</string>
+    <string name="are_you_sure">Are you sure you\'d like to end this track?</string>
     <string name="cancel">Cancel</string>
     <string name="calc_title">Your Calculation</string>
     <string name="calculation">In order to reach your goal weight, you must limit yourself to %1$s per day.</string>
@@ -54,6 +54,8 @@
     <string name="submit">Submit</string>
     <string name="calories">Calories</string>
     <string name="name">Name of Food</string>
+    <string name="food_title">Food Log</string>
+    <string name="activity_title">Activity Log</string>
      <string-array name="food_types">
         <item>Dairy</item>
         <item>Fruit</item>
