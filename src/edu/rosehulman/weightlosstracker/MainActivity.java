@@ -1,29 +1,21 @@
 package edu.rosehulman.weightlosstracker;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
-import android.R;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Surface;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
@@ -33,6 +25,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 
 public class MainActivity extends Activity implements OnClickListener {
@@ -41,7 +34,8 @@ public class MainActivity extends Activity implements OnClickListener {
 	private SQLiteDatabase db;
 	
 	private String usrName;
-	private Button mStartStopButton;
+	private int usrID;
+	private ToggleButton mStartStopButton;
 	private Button mDailyButton;
 	private Button mChallengeButton;
 	private Button mInspireButton;
@@ -49,6 +43,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	protected ArrayList<SleepTime> mSleepTimes;
 	private Button mSleepTrackerButton;
 	private ImageView mCameraImageView;
+	private int goalWeight;
 
 	private static final int REQUEST_CODE_SLEEP_TRACKER = 1;
 	public static final int RESULT_CODE_SLEEP_IN_PROGRESS = 101;
@@ -59,6 +54,9 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int CHALLENGE_DIALOG_ID = 2;
 	private static final int INSPIRE_DIALOG_ID = 3;
 	private static final int RECIPE_DIALOG_ID = 4;
+	
+	private static final int TRUE = 1;
+	private static final int FALSE = 0;
 
 	// Log filter values
 	private static final String MAIN = "MAIN";
@@ -77,17 +75,29 @@ public class MainActivity extends Activity implements OnClickListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		db = dbHelper.getWritableDatabase();
-		
 		setContentView(R.layout.activity_main);
-
-		Resources res = getResources();
+		
+		dbHelper = new SQLHelper(this.getBaseContext());
+		db = dbHelper.getWritableDatabase();
 
 		this.mWelcomeText = (TextView) findViewById(R.id.welcome_label);
-		setWelcomeText("");
-		this.mStartStopButton = (Button) findViewById(R.id.main_start_end_button);
+		this.mStartStopButton = (ToggleButton) findViewById(R.id.main_start_end_button);
 		this.mStartStopButton.setOnClickListener(this);
+		Cursor cursor = db.query("person", new String[] {"id","name","isdone"}, null, null, null, null, null, null);
+		if(cursor.moveToLast()){
+			usrName = cursor.getString(cursor.getColumnIndex("name"));
+			usrID = cursor.getInt(cursor.getColumnIndex("id"));
+			if(cursor.getInt(cursor.getColumnIndex("isdone")) == FALSE){
+				mStartStopButton.setChecked(true);
+			} else {
+				mStartStopButton.setChecked(false);
+			}
+		} else {
+			usrName = "";
+			cursor.close();
+			Log.d("dbug","ERR: Can't return person isDone info.");
+		}
+		setWelcomeText(usrName);
 		this.mDailyButton = (Button) findViewById(R.id.main_daily_button);
 		this.mDailyButton.setOnClickListener(this);
 		this.mChallengeButton = (Button) findViewById(R.id.main_challenge_button);
@@ -105,10 +115,19 @@ public class MainActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.main_start_end_button:
+			ContentValues values = new ContentValues();
+			int value;
+			if(mStartStopButton.isChecked()){
+				showDialog(INITIALIZE_DIALOG_ID);
+				value = FALSE;
+			} else {
+				value = TRUE;
+			}
+			values.put("isdone", value);
+			db.update("person", values, "id=?", new String[]{usrID+""});
 			Log.d(MAIN, "Initialize button clicked");
 			// Intent initialize = new Intent(this, Initialize.class);
 			// startActivity(initialize);
-			showDialog(INITIALIZE_DIALOG_ID);
 			break;
 		case R.id.camera_image_view:
 			Camera camera = Camera.open();
@@ -130,8 +149,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			break;
 		case R.id.main_inspire_button:
 			Log.d(MAIN, "Be Inspired button clicked");
-			Intent inspireIntent = new Intent(this, RandomInspiration.class);
-			startActivity(inspireIntent);
+			showDialog(INSPIRE_DIALOG_ID);
 			break;
 		case R.id.main_recipe_button:
 			Log.d(MAIN, "Random Recipe button clicked");
@@ -206,9 +224,9 @@ public class MainActivity extends Activity implements OnClickListener {
 						values.put("endY", year);
 						long success = db.insert("person", null, values);
 						if(success == -1){
-							System.out.print("ERR: Could not insert initial values into 'person' table");
+							Log.d("dbug","ERR: Could not insert initial values into 'person' table");
 						} else {
-							System.out.print("SUCCESS: New person initialized.");
+							Log.d("dbug","SUCCESS: New person initialized.");
 						}
 						
 						setWelcomeText(nameText.getText().toString() + "'s");
@@ -231,17 +249,17 @@ public class MainActivity extends Activity implements OnClickListener {
 			dialog.setContentView(R.layout.activity_daily);
 			dialog.setTitle(R.string.daily_title);
 			
-			final EditText weightET = (EditText) findViewById(R.id.weight);
-			final Button setButton = (Button) findViewById(R.id.weight_log_button);
-			final Button foodButton = (Button) findViewById(R.id.food_log_button);
-			final Button activityButton = (Button) findViewById(R.id.activity_log_button);
-			final Button closeButton = (Button) findViewById(R.id.close_daily);
-			final TextView calsTV = (TextView) findViewById(R.id.cals_left);
-			final TextView daysTV = (TextView) findViewById(R.id.days_left);
-			final ProgressBar progress = (ProgressBar) findViewById(R.id.progressBar);
+			final EditText weightET = (EditText) dialog.findViewById(R.id.weight);
+			final Button setButton = (Button) dialog.findViewById(R.id.weight_log_button);
+			final Button foodButton = (Button) dialog.findViewById(R.id.food_log_button);
+			final Button activityButton = (Button) dialog.findViewById(R.id.activity_log_button);
+			final Button closeButton = (Button) dialog.findViewById(R.id.close_daily);
+			final TextView calsTV = (TextView) dialog.findViewById(R.id.cals_left);
+			final TextView daysTV = (TextView) dialog.findViewById(R.id.days_left);
+			final ProgressBar progress = (ProgressBar) dialog.findViewById(R.id.progressBar);
 			
 			Calendar end = Calendar.getInstance();
-			int goalWeight = 0;
+			
 			Cursor cursor = db.query("person", new String[] {"weight","endD","endM","endY"}, null, null, null, null, null, null);
 			if(cursor.moveToLast()){
 				goalWeight = cursor.getInt(cursor.getColumnIndex("weight"));
@@ -251,7 +269,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				end.set(year, month, day);
 			} else {
 				cursor.close();
-				System.out.print("ERR: Can't return person info.");
+				Log.d("dbug","ERR: Can't return person info.");
 			}
 			Resources res = getResources();
 			//calsTV.setText(res.getString(R.string.calories_left, name));
@@ -260,7 +278,28 @@ public class MainActivity extends Activity implements OnClickListener {
 			setButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					Resources res = getResources();
+					int weight = Integer.parseInt(weightET.getText().toString());
+					int percent = ((weight*100)/goalWeight);
+					progress.setProgress(percent);
+					String date = dateToString(Calendar.getInstance());
+					ContentValues values = new ContentValues();
+					long success;
+					if(setButton.getText() == res.getString(R.string.weight_log_submit)){
+						values.put("date", date);
+						values.put("weight", weight);
+						success = db.insert("weight", null, values);
+						setButton.setText(res.getString(R.string.weight_log_update));
+					} else {
+						values.put("weight", weight);
+						success = db.update("weight", values, "date=?", new String[] {date});
+					}
 					
+					if(success == -1){
+						Log.d("dbug","ERR: Could not insert/update weight into 'weight' table");
+					} else {
+						Log.d("dbug","SUCCESS: Weight inserted/updated.");
+					}
 				}	
 			});
 			foodButton.setOnClickListener(new OnClickListener() {
@@ -287,9 +326,9 @@ public class MainActivity extends Activity implements OnClickListener {
 		case CHALLENGE_DIALOG_ID:
 			dialog.setContentView(R.layout.activity_challenge);
 			dialog.setTitle(R.string.challenge_title);
-			final TextView challengeView = (TextView) findViewById(R.id.challenge_textview);
-			final Button newActButton = (Button) findViewById(R.id.challenge_new_button);
-			final Button closeActButton = (Button) findViewById(R.id.challenge_close_button);
+			final TextView challengeView = (TextView) dialog.findViewById(R.id.challenge_textview);
+			final Button newActButton = (Button) dialog.findViewById(R.id.challenge_new_button);
+			final Button closeActButton = (Button) dialog.findViewById(R.id.challenge_close_button);
 
 			newActButton.setOnClickListener(new OnClickListener() {
 				@Override
@@ -304,7 +343,7 @@ public class MainActivity extends Activity implements OnClickListener {
 						} while  (cursor.moveToNext());
 					} else {
 						cursor.close();
-						System.out.print("ERR: Can't return activity quote.");
+						Log.d("dbug","ERR: Can't return activity quote.");
 					}
 					challengeView.setText(activity);
 				}
@@ -321,9 +360,9 @@ public class MainActivity extends Activity implements OnClickListener {
 			dialog.setContentView(R.layout.activity_inspire);
 			dialog.setTitle(R.string.inspire_title);
 	
-			final TextView quoteView = (TextView) findViewById(R.id.inspire_textview);
-			final Button newInspireButton = (Button) findViewById(R.id.inspire_new_button);
-			final Button closeInspireButton = (Button) findViewById(R.id.inspire_close_button);
+			final TextView quoteView = (TextView) dialog.findViewById(R.id.inspire_textview);
+			final Button newInspireButton = (Button) dialog.findViewById(R.id.inspire_new_button);
+			final Button closeInspireButton = (Button) dialog.findViewById(R.id.inspire_close_button);
 
 			newInspireButton.setOnClickListener(new OnClickListener() {
 				@Override
@@ -338,7 +377,7 @@ public class MainActivity extends Activity implements OnClickListener {
 						} while  (cursor.moveToNext());
 					} else {
 						cursor.close();
-						System.out.print("ERR: Can't return random quote.");
+						Log.d("dbug","ERR: Can't return random quote.");
 					}
 					quoteView.setText(quote);
 				}
@@ -354,10 +393,10 @@ public class MainActivity extends Activity implements OnClickListener {
 			break;
 		case RECIPE_DIALOG_ID:
 			dialog.setContentView(R.layout.activity_recipe);
-			dialog.setTitle(R.string.challenge_title);
-			final WebView page = (WebView) findViewById(R.id.wb_webview);
-			final Button newRecipeButton = (Button) findViewById(R.id.recipe_new_button);
-			final Button closeRecipeButton = (Button) findViewById(R.id.recipe_close_button);
+			dialog.setTitle(R.string.recipe_title);
+			final WebView page = (WebView) dialog.findViewById(R.id.wb_webview);
+			final Button newRecipeButton = (Button) dialog.findViewById(R.id.recipe_new_button);
+			final Button closeRecipeButton = (Button) dialog.findViewById(R.id.recipe_close_button);
 
 			newRecipeButton.setOnClickListener(new OnClickListener() {
 				@Override
@@ -372,7 +411,7 @@ public class MainActivity extends Activity implements OnClickListener {
 						} while  (cursor.moveToNext());
 					} else {
 						cursor.close();
-						System.out.print("ERR: Can't return activity quote.");
+						Log.d("dbug","ERR: Can't return activity quote.");
 					}
 					page.loadUrl(recipe);
 				}
@@ -392,7 +431,6 @@ public class MainActivity extends Activity implements OnClickListener {
 	}
 
 	private void setWelcomeText(String name) {
-		this.usrName = name;
 		Resources res = getResources();
 		this.mWelcomeText.setText(res.getString(R.string.welcome_text, name));
 	}
@@ -406,6 +444,14 @@ public class MainActivity extends Activity implements OnClickListener {
 		    daysBetween++;  
 		  }
 		return daysBetween;
+	}
+	
+	private String dateToString(Calendar date){
+		int day = date.getTime().getDate();
+		int month = date.getTime().getMonth();
+		int year = date.getTime().getYear();
+		String stringDate = month + "/" + day + "/" + year;
+		return stringDate;
 	}
 
 //	private void setGoalLost(int goal) {

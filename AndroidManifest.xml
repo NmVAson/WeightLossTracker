@@ -27,10 +27,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".RandomInspiration"
-            android:label="@string/inspire_title" >
-        </activity>
-        <activity
             android:name=".SleepActivity"
             android:label="@string/title_activity_sleep" >
         </activity>

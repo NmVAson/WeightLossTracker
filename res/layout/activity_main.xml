@@ -61,6 +61,13 @@
             android:layout_height="wrap_content"
             android:text="@string/daily_menu_button_label"
             android:textSize="30sp" />
+        
+        <Button
+            android:id="@+id/main_recipe_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/recipe_button_label"
+            android:textSize="30sp" />
 
         <Button
             android:id="@+id/main_challenge_button"

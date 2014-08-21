@@ -9,7 +9,7 @@ import android.util.Log;
 public class SQLHelper extends SQLiteOpenHelper {
 
 	  private static final String DATABASE_NAME = "wltracker.db";
-	  private static final int DATABASE_VERSION = 1;
+	  private static final int DATABASE_VERSION = 2;
 	  private static final String[] quoteList = {
 			"If it's to be, it's up to me!",
 			"Take care of your body. It's the only place you have to live!",
@@ -45,26 +45,32 @@ public class SQLHelper extends SQLiteOpenHelper {
 		db.execSQL("CREATE TABLE IF NOT EXISTS person (id       INTEGER PRIMARY KEY AUTOINCREMENT,"
 													  +"name	TEXT,"
 													  +"age		INTEGER,"
-													  +"weight	INTEGER"
-													  +"endD	INTEGER"
-													  +"endM	INTEGER"
-													  +"endY	INTEGER"
+													  +"weight	INTEGER,"
+													  +"endD	INTEGER,"
+													  +"endM	INTEGER,"
+													  +"endY	INTEGER,"
+													  +"isdone	INTEGER"
 													  +");");
+		
+		Log.d("dbug","Created 'person'");
 		db.execSQL("CREATE TABLE IF NOT EXISTS weight (id       INTEGER PRIMARY KEY AUTOINCREMENT,"
 													  +"date	TEXT,"
-													  +"weight	INTEGER,"
+													  +"weight	INTEGER"
 													  +");");
+		Log.d("dbug","Created 'weight'");
 		db.execSQL("CREATE TABLE IF NOT EXISTS food (id         INTEGER PRIMARY KEY AUTOINCREMENT,"
 													+"date		TEXT,"
 													+"name		TEXT,"
 													+"type		TEXT,"
 													+"cals		INTEGER"
 													+");");
+		Log.d("dbug","Created 'food'");
 		db.execSQL("CREATE TABLE IF NOT EXISTS activity (id         INTEGER PRIMARY KEY AUTOINCREMENT,"
 														+"date		TEXT,"
 														+"name		TEXT,"
 														+"calsburned	INTEGER"
 														+");");
+		Log.d("dbug","Created 'activity'");
 		db.execSQL("CREATE TABLE IF NOT EXISTS sleep (id        INTEGER PRIMARY KEY AUTOINCREMENT,"
 													+"date		TEXT,"
 												    +"sleephr	INTEGER,"
@@ -73,18 +79,20 @@ public class SQLHelper extends SQLiteOpenHelper {
 												    +"wakemin	INTEGER,"
 												    +"hrs		INTEGER"
 												    +");");
+		Log.d("dbug","Created 'sleep'");
 		db.execSQL("CREATE TABLE IF NOT EXISTS randoms (id			INTEGER PRIMARY KEY AUTOINCREMENT,"
 													   +"type		TEXT,"
-													   +"text		TEXT,"
+													   +"text		TEXT"
 													   +");");
+		Log.d("dbug","Created 'randoms'");
 		for(String quote:quoteList){
 			ContentValues values = new ContentValues();
 			values.put("type","quote");
 			values.put("text", quote);
 			if(db.insert("randoms", null, values) == -1){
-				System.out.print("ERR: Could not load quotes into DB");
+				Log.d("DB ERR","Could not load quotes into DB");
 			} else {
-				System.out.print("SUCCESS: Quotes loaded into DB");
+				Log.d("DB Success","Quotes loaded into DB");
 			}
 		}
 		for(String activity:activityList){
@@ -92,9 +100,9 @@ public class SQLHelper extends SQLiteOpenHelper {
 			values.put("type","activity");
 			values.put("text", activity);
 			if(db.insert("randoms", null, values) == -1){
-				System.out.print("ERR: Could not load activities into DB");
+				Log.d("DB ERR","Could not load activities into DB");
 			} else {
-				System.out.print("SUCCESS: Activities loaded into DB");
+				Log.d("DB Success","Activities loaded into DB");
 			}
 		}
 		for(String recipe:recipeList){
@@ -102,11 +110,12 @@ public class SQLHelper extends SQLiteOpenHelper {
 			values.put("type","recipe");
 			values.put("text", recipe);
 			if(db.insert("randoms", null, values) == -1){
-				System.out.print("ERR: Could not load recipes into DB");
+				Log.d("DB ERR","Could not load recipes into DB");
 			} else {
-				System.out.print("SUCCESS: Recipes loaded into DB");
+				Log.d("DB Success","Recipes loaded into DB");
 			}
 		}
+		Log.d("DB Success","DB Initialized");
 		
 	}
 

@@ -2,20 +2,25 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:layout_gravity="center_vertical"
     android:background="@drawable/daily"
     android:gravity="center_vertical|center_horizontal"
-    android:layout_gravity="center_vertical"
-    android:orientation="vertical" >
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-        
-
-	    
-    </LinearLayout>
+    android:orientation="horizontal" xmlns:android1="http://schemas.android.com/apk/res/android">
     
+    <EditText
+	     android:id="@+id/weight"
+	     android:layout_width="match_parent"
+	     android:layout_height="wrap_content"
+	     android:ems="10"
+	     android:hint = "@string/weight_hint"
+	     android:inputType="number" >
+	</EditText>
+	<Button
+	     android:id="@+id/weight_log_button"
+	     android:layout_width="wrap_content"
+	     android:layout_height="wrap_content"
+	     android:text="@string/weight_log_submit" />
+	
     <Button
         android:id="@+id/food_log_button"
         android:layout_width="wrap_content"
