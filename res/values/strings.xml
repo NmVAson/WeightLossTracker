@@ -67,9 +67,9 @@
         <item>Alcohol</item>
     </string-array>
      <string-array name="summaries">
-        <item>Weight v. Time</item>
-        <item>Activity v. Time</item>
-        <item>Sleep v. Time</item>
+        <item>Weight v Time</item>
+        <item>Activity v Time</item>
+        <item>Sleep v Time</item>
         <item>Food Summary</item>
     </string-array>
 

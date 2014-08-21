@@ -9,11 +9,5 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" 
     android:id="@+id/data_layout"
-    android:orientation="vertical">
-    
-    <Spinner
-	    android:id="@+id/summary_type_spinner"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content" />
-	    
+    android:orientation="vertical">    
 </LinearLayout>

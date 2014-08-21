@@ -5,6 +5,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GraphView.GraphViewData;
+import com.jjoe64.graphview.GraphViewDataInterface;
+import com.jjoe64.graphview.GraphViewSeries;
+import com.jjoe64.graphview.LineGraphView;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -22,11 +28,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -619,30 +627,28 @@ public class MainActivity extends Activity implements OnClickListener {
 			});
 			break;
 		case SUMMARY_DIALOG_ID:
+			dialog.hide();
 			dialog.setContentView(R.layout.data_summary_layout);
 			dialog.setTitle(R.string.summary_title);
 			
-			final Spinner spinner = (Spinner) thisView.findViewById(R.id.summary_type_spinner);
+			LinearLayout layout = (LinearLayout) dialog.findViewById(R.id.data_layout); 
+			final Spinner spinner = new Spinner(dialog.getContext());
 			
 			//SET UP THE SPINNER
-			ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(MainActivity.this,
-			        R.array.summaries, android.R.layout.simple_spinner_item);
-			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			spinner.setAdapter(adapter);
-			
-			spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
 				public void onItemSelected(AdapterView<?> parent, View view, int pos, long id){
 	                
-					GraphViewData[] data;
-					String message;
-					switch(getLastVisiblePosition()){
+					ArrayList<GraphViewData> data = new ArrayList<GraphViewData>();
+					data.add(new GraphViewData(0,0));
+					String message = null;
+					switch(spinner.getLastVisiblePosition()){
 					case DATA_WEIGHT_POS:
 						Cursor cursor = db.query("weight", new String[] {"weight"}, null, null, null, null, null, null);
 						int count = 0;
 						if(cursor.moveToFirst()){
 							do{
-								int weight = cursor.getString(cursor.getColumnIndex("weight"));
+								int weight = Integer.parseInt(cursor.getString(cursor.getColumnIndex("weight")));
 								data.add(new GraphViewData(count,weight));
 								count ++;
 							} while  (cursor.moveToNext());
@@ -652,47 +658,47 @@ public class MainActivity extends Activity implements OnClickListener {
 						}
 						break;
 					case DATA_ACTIVITY_POS:
-						Cursor cursor = db.rawQuery("SELECT date,SUM(calsburned) AS burned FROM activity GROUP BY date",null);
-						int count = 0;
-						if(cursor.moveToFirst()){
+						Cursor cursorAct = db.rawQuery("SELECT date,SUM(calsburned) AS burned FROM activity GROUP BY date",null);
+						int countAct = 0;
+						if(cursorAct.moveToFirst()){
 							do{
-								int cals = cursor.getString(cursor.getColumnIndex("burned"));
-								data.add(new GraphViewData(count,cals));
-								count ++;
-							} while  (cursor.moveToNext());
+								int cals = Integer.parseInt(cursorAct.getString(cursorAct.getColumnIndex("burned")));
+								data.add(new GraphViewData(countAct,cals));
+								countAct ++;
+							} while  (cursorAct.moveToNext());
 						} else {
-							cursor.close();
+							cursorAct.close();
 							Log.d("dbug","ERR: Can't return activity data.");
 						}
 						break;
 					case  DATA_SLEEP_POS:
-						Cursor cursor = db.query("sleep", new String[] {"hr","min"}, null, null, null, null, null, null);
-						int count = 0;
-						if(cursor.moveToFirst()){
+						Cursor cursorSleep = db.query("sleep", new String[] {"hr","min"}, null, null, null, null, null, null);
+						int countSleep = 0;
+						if(cursorSleep.moveToFirst()){
 							do{
-								int hour = cursor.getString(cursor.getColumnIndex("hr"));
-								int min = cursor.getString(cursor.getColumnIndex("min"));
+								int hour = Integer.parseInt(cursorSleep.getString(cursorSleep.getColumnIndex("hr")));
+								int min = Integer.parseInt(cursorSleep.getString(cursorSleep.getColumnIndex("min")));
 								double time = hour + (min/60);
-								data.add(new GraphViewData(count,time));
-								count ++;
-							} while  (cursor.moveToNext());
+								data.add(new GraphViewData(countSleep,time));
+								countSleep ++;
+							} while  (cursorSleep.moveToNext());
 						} else {
-							cursor.close();
+							cursorSleep.close();
 							Log.d("dbug","ERR: Can't return sleep data.");
 						}
 						break;
 					case DATA_FOOD_POS:
 						//select type, count(type) from table group by type;
-						Cursor cursor = db.rawQuery("SELECT type,COUNT(type) AS count FROM food GROUP BY type",null);
+						Cursor cursorFood = db.rawQuery("SELECT type,COUNT(type) AS count FROM food GROUP BY type",null);
 						message = "Your diet breaks down as follows:\n";
-						if(cursor.moveToFirst()){
+						if(cursorFood.moveToFirst()){
 							do{
-								String type = cursor.getString(cursor.getColumnIndex("type"));
-								int count = cursor.getString(cursor.getColumnIndex("count"));
-								message.append(type+"   "+count+"\n");
-							} while  (cursor.moveToNext());
+								String type = cursorFood.getString(cursorFood.getColumnIndex("type"));
+								int typeCount = Integer.parseInt(cursorFood.getString(cursorFood.getColumnIndex("count")));
+								message += type+"   "+typeCount+"\n";
+							} while  (cursorFood.moveToNext());
 						} else {
-							cursor.close();
+							cursorFood.close();
 							Log.d("dbug","ERR: Can't return activity data.");
 						}
 						break;
@@ -700,14 +706,14 @@ public class MainActivity extends Activity implements OnClickListener {
 						break;
 					}
 					
-					LinearLayout layout = (LinearLayout) findViewById(R.id.data_summary_layout); 
-					if(getLastVisiblePosition() != DATA_FOOD_POS){
-						GraphViewSeries thisSeries = new GraphViewSeries(data);
-						GraphView graphView = new LineGraphView(this, "Job Status Graph");  
+					LinearLayout layout = (LinearLayout) findViewById(R.id.data_layout); 
+					if(spinner.getLastVisiblePosition() != DATA_FOOD_POS){
+						GraphViewSeries thisSeries = new GraphViewSeries((GraphViewDataInterface[]) data.toArray());
+						GraphView graphView = new LineGraphView(layout.getContext(), "Data Chart");  
 						graphView.addSeries(thisSeries); 
 						layout.addView(graphView);  
 					} else {
-						TextView summary = new TextView();
+						TextView summary = new TextView(layout.getContext());
 						summary.setText(message);
 						layout.addView(summary);
 					}
@@ -717,7 +723,15 @@ public class MainActivity extends Activity implements OnClickListener {
 	                // do nothing
 	            }
 	                      
-	        });     
+	        });  
+			
+			ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(MainActivity.this,
+			        R.array.summaries, android.R.layout.simple_spinner_item);
+			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			spinner.setAdapter(adapter);
+			layout.addView(spinner);
+			Log.d("dbug","Adapter set");
+			dialog.show();
 			break;
 		default:
 			break;
